@@ -1,0 +1,59 @@
+version: 2
+
+builds:
+  - id: he
+    main: ./main.go
+    binary: he
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.ShortCommit}}
+      - -X main.date={{.Date}}
+
+archives:
+  - id: default
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    name_template: "he_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+
+brews:
+  - name: he
+    repository:
+      owner: TParizek
+      name: healthexport_tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    directory: Formula
+    homepage: "https://github.com/TParizek/healthexport_cli"
+    description: "HealthExport CLI - read and decrypt your health data"
+    license: "MIT"
+    test: |
+      system "#{bin}/he", "version"
+    install: |
+      bin.install "he"
+
+release:
+  github:
+    owner: TParizek
+    name: healthexport_cli

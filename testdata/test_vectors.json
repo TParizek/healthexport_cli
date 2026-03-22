@@ -1,0 +1,54 @@
+{
+  "uid_derivation": [
+    {
+      "account_key": "abcdef.0123456789abcdef0123456789abcdef.gh01",
+      "expected_uid": "k0AzThdL1Tod7ZcWlfQw4yDDc0nfUBw7Pdqbc9Xy8cB48ztshvoq6S+TmsuU9vSzGZTYb+6sKi6/Ddjy1t/PCw=="
+    },
+    {
+      "account_key": "0123456789abcdef0123456789abcdef",
+      "expected_uid": "A3KoYZ68u82Rq82hujiaw25yliiHswGd4zcqVh/ZYtp+nPoMMGnEbKXcKtiOYH5wu3qHmWq5b+p6on5SiJUgVQ=="
+    }
+  ],
+  "decryption_key_extraction": [
+    {
+      "account_key": "abcdef.0123456789abcdef0123456789abcdef.gh01",
+      "expected_key": "0123456789abcdef0123456789abcdef"
+    },
+    {
+      "account_key": "0123456789abcdef0123456789abcdef",
+      "expected_key": "0123456789abcdef0123456789abcdef"
+    }
+  ],
+  "decryption": [
+    {
+      "key": "0123456789abcdef0123456789abcdef",
+      "nonce_b64": "AQIDBAUGBwgJCgsM",
+      "cipher_b64": "lmaYhg==",
+      "expected_plaintext": "75.5"
+    },
+    {
+      "key": "0123456789abcdef0123456789abcdef",
+      "nonce_b64": "AQIDBAUGBwgJCgsM",
+      "cipher_b64": "mWeFgQ==",
+      "expected_plaintext": "8432"
+    },
+    {
+      "key": "0123456789abcdef0123456789abcdef",
+      "nonce_b64": "AQIDBAUGBwgJCgsM",
+      "cipher_b64": "kQ==",
+      "expected_plaintext": "0"
+    },
+    {
+      "key": "0123456789abcdef0123456789abcdef",
+      "nonce_b64": "AQIDBAUGBwgJCgsM",
+      "cipher_b64": "4HPa3A+L74QZlSNted6ZfJtOXsam",
+      "expected_plaintext": "A longer string value"
+    },
+    {
+      "key": "0123456789abcdef0123456789abcdef",
+      "nonce_b64": "AQIDBAUGBwgJCgsM",
+      "cipher_b64": "jGKEnVLY",
+      "expected_plaintext": "-12.34"
+    }
+  ]
+}

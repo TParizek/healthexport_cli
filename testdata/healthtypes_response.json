@@ -1,0 +1,64 @@
+{
+  "aggregated": [
+    {
+      "name": "Activity",
+      "types": [
+        {
+          "id": 5,
+          "name": "Distance cycling",
+          "category": "Cumulative",
+          "subCategory": "Activity"
+        },
+        {
+          "id": 9,
+          "name": "Step count",
+          "category": "Cumulative",
+          "subCategory": "Activity"
+        }
+      ]
+    }
+  ],
+  "record": [
+    {
+      "name": "Body",
+      "types": [
+        {
+          "id": 0,
+          "name": "Body mass",
+          "category": "Record",
+          "subCategory": "Body"
+        },
+        {
+          "id": 1,
+          "name": "Body fat percentage",
+          "category": "Record",
+          "subCategory": "Body"
+        }
+      ]
+    },
+    {
+      "name": "Sleep",
+      "types": [
+        {
+          "id": 24,
+          "name": "Time in bed",
+          "category": "Record",
+          "subCategory": "Sleep"
+        }
+      ]
+    }
+  ],
+  "workout": [
+    {
+      "name": "Workout",
+      "types": [
+        {
+          "id": 26,
+          "name": "Workouts",
+          "category": "Workout",
+          "subCategory": "Workout"
+        }
+      ]
+    }
+  ]
+}

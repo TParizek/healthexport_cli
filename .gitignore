@@ -1,0 +1,28 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+he
+
+# Test binaries
+*.test
+
+# Build output
+bin/
+dist/
+
+# Coverage output
+.coverprofile
+coverage.out
+*.out
+
+# Dependency directories
+vendor/
+
+# macOS filesystem noise
+.DS_Store
+requirements/.DS_Store
+requirements
+.codex
