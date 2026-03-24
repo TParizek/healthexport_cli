@@ -1,8 +1,8 @@
 # HealthExport CLI (he)
 
-[![CI](https://github.com/TParizek/healthexport_cli/actions/workflows/ci.yml/badge.svg)](https://github.com/TParizek/healthexport_cli/actions/workflows/ci.yml)
-[![Latest Release](https://img.shields.io/github/v/release/TParizek/healthexport_cli)](https://github.com/TParizek/healthexport_cli/releases)
-[![License: MIT](https://img.shields.io/github/license/TParizek/healthexport_cli)](LICENSE)
+[![Release](https://github.com/TParizek/healthexport_cli/actions/workflows/release.yml/badge.svg)](https://github.com/TParizek/healthexport_cli/actions/workflows/release.yml)
+[![Latest Release](https://img.shields.io/github/v/tag/TParizek/healthexport_cli?label=release&sort=semver)](https://github.com/TParizek/healthexport_cli/releases)
+[![License: MIT](https://img.shields.io/github/license/TParizek/healthexport_cli?label=license)](https://github.com/TParizek/healthexport_cli/blob/main/LICENSE)
 
 Read and decrypt your health data from the command line.
 
