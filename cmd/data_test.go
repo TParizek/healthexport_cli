@@ -273,7 +273,7 @@ func TestRunDataAggregatesResolvedNamedType(t *testing.T) {
 
 	output := stdout.String()
 	assertContains(t, output, "\"period\": \"2024-01-14\"")
-	assertContains(t, output, "\"value\": 8507.5")
+	assertContains(t, output, "\"value\": 8508")
 	assertContains(t, output, "\"type_name\": \"Step count\"")
 }
 

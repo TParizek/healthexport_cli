@@ -1,0 +1,94 @@
+{
+  "manifest_version": "0.3",
+  "name": "health-export",
+  "display_name": "HealthExport",
+  "version": "__VERSION__",
+  "description": "Access Apple Health data through HealthExport, including steps, heart rate, sleep, workouts, calories, weight, nutrition, and many other health and fitness metrics.",
+  "long_description": "HealthExport provides access to Apple Health data including steps, heart rate, sleep, workouts, calories, weight, nutrition, blood pressure, activity history, Apple Watch metrics, and many other health and fitness measurements. Use it whenever the user asks about health data, fitness stats, trends, workouts, sleep, or biometric measurements. The extension runs locally on the host machine and reuses the same HealthExport configuration as the `he` CLI.",
+  "author": {
+    "name": "Tomas Parizek"
+  },
+  "homepage": "https://github.com/TParizek/healthexport_cli",
+  "documentation": "https://github.com/TParizek/healthexport_cli/blob/main/docs/mcp.md",
+  "support": "https://github.com/TParizek/healthexport_cli/issues",
+  "icon": "icon.png",
+  "server": {
+    "type": "binary",
+    "entry_point": "server/he-mcp",
+    "mcp_config": {
+      "command": "${__dirname}/server/he-mcp",
+      "args": [],
+      "env": {
+        "HE_MCP_CONFIG_PATH": "${user_config.configPath}",
+        "HE_MCP_API_URL": "${user_config.apiURL}",
+        "HE_MCP_REQUEST_TIMEOUT_SECONDS": "${user_config.requestTimeoutSeconds}",
+        "HE_MCP_MAX_RECORDS_WARNING_THRESHOLD": "${user_config.maxRecordsWarningThreshold}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "list_health_types",
+      "description": "HealthExport healthexport he — List all available health and fitness metric types from Apple Health. Returns categories of queryable metrics including: steps, step count, walking, running distance, cycling distance, flights climbed, active calories, resting calories, exercise minutes, heart rate, resting heart rate, HRV, blood pressure, blood oxygen, respiratory rate, body temperature, weight, BMI, body fat, sleep, sleep analysis, nutrition, water intake, caffeine, workouts, and more. Call this tool first before fetching any health data to discover which metrics are available. Supports filtering by category: 'aggregated' (totals like steps and calories), 'record' (readings like heart rate and weight), or 'workout' (exercise sessions)."
+    },
+    {
+      "name": "fetch_health_data",
+      "description": "HealthExport healthexport he — Fetch health and fitness data from Apple Health for a specific date range. Query any metric including steps, step count, walking distance, running distance, cycling distance, flights climbed, active energy, resting energy, exercise time, heart rate, resting heart rate, HRV, blood pressure, blood oxygen, weight, BMI, body fat, sleep analysis, water intake, nutrition, caffeine, workouts, and more. Results can be aggregated by day, week, month, or year for trends and summaries. Use list_health_types first to discover all available metric names."
+    },
+    {
+      "name": "health_export_status",
+      "description": "HealthExport healthexport he — Check whether the HealthExport MCP server is connected and ready to query Apple Health data. Call this to verify connectivity before fetching steps, heart rate, sleep, weight, workouts, calories, or any other health and fitness metrics."
+    }
+  ],
+  "tools_generated": true,
+  "keywords": [
+    "health",
+    "fitness",
+    "apple health",
+    "apple watch",
+    "steps",
+    "heart rate",
+    "sleep",
+    "calories",
+    "workout",
+    "exercise",
+    "weight",
+    "nutrition",
+    "activity"
+  ],
+  "compatibility": {
+    "platforms": [
+      "darwin"
+    ]
+  },
+  "user_config": {
+    "configPath": {
+      "type": "string",
+      "title": "Config Path Override",
+      "description": "Optional path to a HealthExport config file. Leave empty to use the default CLI config path.",
+      "required": false
+    },
+    "apiURL": {
+      "type": "string",
+      "title": "API URL Override",
+      "description": "Optional API base URL override for testing or self-hosted development environments.",
+      "required": false
+    },
+    "requestTimeoutSeconds": {
+      "type": "number",
+      "title": "Request Timeout (seconds)",
+      "description": "HTTP timeout used when calling the HealthExport API.",
+      "required": false,
+      "default": 30,
+      "min": 1
+    },
+    "maxRecordsWarningThreshold": {
+      "type": "number",
+      "title": "Large Response Warning Threshold",
+      "description": "Warn when a tool response contains more than this many records.",
+      "required": false,
+      "default": 5000,
+      "min": 1
+    }
+  }
+}

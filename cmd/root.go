@@ -10,6 +10,7 @@ import (
 	"github.com/TParizek/healthexport_cli/internal/api"
 	"github.com/TParizek/healthexport_cli/internal/auth"
 	"github.com/TParizek/healthexport_cli/internal/config"
+	"github.com/TParizek/healthexport_cli/internal/service"
 	"github.com/TParizek/healthexport_cli/internal/typemap"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -182,6 +183,8 @@ func exitCodeForError(err error) int {
 	case errors.Is(err, auth.ErrNoAccountKey):
 		return 2
 	case errors.Is(err, auth.ErrInvalidKeyFormat):
+		return 4
+	case errors.Is(err, service.ErrInvalidInput):
 		return 4
 	case errors.As(err, &apiErr):
 		return 3
