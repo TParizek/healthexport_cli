@@ -13,6 +13,10 @@ const EnvKeyName = "HEALTHEXPORT_ACCOUNT_KEY"
 var ErrNoAccountKey = errors.New("no account key configured")
 
 func Resolve(flagValue string) (*AccountKey, string, error) {
+	return ResolveWithConfigPath(flagValue, "")
+}
+
+func ResolveWithConfigPath(flagValue, configPath string) (*AccountKey, string, error) {
 	if flagValue != "" {
 		return parseFromSource(flagValue, "--account-key flag")
 	}
@@ -21,13 +25,14 @@ func Resolve(flagValue string) (*AccountKey, string, error) {
 		return parseFromSource(envValue, EnvKeyName+" env var")
 	}
 
-	cfg, err := config.Load()
+	resolvedConfigPath := config.ResolvePath(configPath)
+	cfg, err := config.LoadFromPath(resolvedConfigPath)
 	if err != nil {
 		return nil, "", fmt.Errorf("load config: %w", err)
 	}
 
 	if cfg.AccountKey != "" {
-		return parseFromSource(cfg.AccountKey, "~/.config/healthexport/config.yaml")
+		return parseFromSource(cfg.AccountKey, config.DisplayPath(resolvedConfigPath))
 	}
 
 	return nil, "", ErrNoAccountKey

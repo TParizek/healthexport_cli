@@ -26,3 +26,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+      - name: Build MCPB assets
+        env:
+          HE_MCPB_VERSION: ${{ github.ref_name }}
+          HE_MCPB_COMMIT: ${{ github.sha }}
+        run: |
+          export HE_MCPB_DATE="$(git log -1 --format=%cI)"
+          GOARCH=arm64 ./scripts/build_mcpb.sh dist/health-export_${HE_MCPB_VERSION#v}_darwin_arm64.mcpb
+          GOARCH=amd64 ./scripts/build_mcpb.sh dist/health-export_${HE_MCPB_VERSION#v}_darwin_amd64.mcpb
+      - name: Upload MCPB assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.ref_name }}" dist/*.mcpb --clobber

@@ -11,6 +11,8 @@ he
 
 # Build output
 bin/
+.bin/
+.cache/
 dist/
 
 # Coverage output

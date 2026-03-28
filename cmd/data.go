@@ -2,18 +2,12 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/TParizek/healthexport_cli/internal/aggregator"
 	"github.com/TParizek/healthexport_cli/internal/api"
-	"github.com/TParizek/healthexport_cli/internal/auth"
-	"github.com/TParizek/healthexport_cli/internal/config"
-	"github.com/TParizek/healthexport_cli/internal/crypto"
 	"github.com/TParizek/healthexport_cli/internal/output"
-	"github.com/TParizek/healthexport_cli/internal/typemap"
+	"github.com/TParizek/healthexport_cli/internal/service"
 	"github.com/spf13/cobra"
 )
 
@@ -74,61 +68,30 @@ func init() {
 }
 
 func runData(cmd *cobra.Command, args []string) error {
-	accountKey, _, err := auth.Resolve(accountKey)
-	if err != nil {
-		return err
+	opts := service.Options{
+		AccountKey: accountKey,
+		APIURL:     apiURL,
 	}
 
-	dateFrom, err := parseDate(dataFrom)
+	result, err := service.FetchHealthData(opts, service.FetchRequest{
+		Types:     dataTypes,
+		From:      dataFrom,
+		To:        dataTo,
+		Aggregate: dataAggregate,
+		Raw:       dataRaw,
+	})
 	if err != nil {
-		return exitError(err, 4)
-	}
-
-	dateTo, err := parseDate(dataTo)
-	if err != nil {
-		return exitError(err, 4)
-	}
-
-	var period *aggregator.Period
-	if strings.TrimSpace(dataAggregate) != "" {
-		parsedPeriod, err := aggregator.ParsePeriod(dataAggregate)
-		if err != nil {
+		switch {
+		case errors.Is(err, service.ErrInvalidInput):
 			return exitError(err, 4)
+		default:
+			return err
 		}
-
-		period = &parsedPeriod
-	}
-
-	client := api.NewClient(resolveAPIURL())
-
-	typeIDs, typeNames, err := resolveTypes(client, dataTypes, period)
-	if err != nil {
-		if errors.Is(err, typemap.ErrUnknownType) || errors.Is(err, aggregator.ErrNotAggregatable) {
-			return exitError(err, 4)
-		}
-
-		return err
-	}
-
-	encrypted, err := client.FetchEncryptedData(accountKey.UID, typeIDs, dateFrom, dateTo)
-	if err != nil {
-		return err
 	}
 
 	if dataRaw {
-		enrichEncryptedTypeNames(encrypted, typeNames)
-		return output.JSONFormatter{}.FormatRawData(cmd.OutOrStdout(), encrypted)
+		return output.JSONFormatter{}.FormatRawData(cmd.OutOrStdout(), result.Raw)
 	}
-
-	if len(typeNames) == 0 {
-		typeNames = fetchTypeNamesBestEffort(client, typeIDs)
-	}
-
-	decrypted, err := crypto.DecryptRecords(encrypted, accountKey.DecryptionKey)
-	if err != nil {
-		return err
-	}
-	enrichDecryptedTypeNames(decrypted, typeNames)
 
 	format := resolveOutputFormat(dataFormat)
 	formatter, err := output.NewFormatter(format)
@@ -136,244 +99,21 @@ func runData(cmd *cobra.Command, args []string) error {
 		return exitError(err, 4)
 	}
 
-	if period != nil {
-		aggregated, err := aggregatePackages(decrypted, *period)
-		if err != nil {
-			return err
-		}
-
-		return formatter.FormatAggregatedData(cmd.OutOrStdout(), aggregated)
+	if strings.TrimSpace(dataAggregate) != "" {
+		return formatter.FormatAggregatedData(cmd.OutOrStdout(), result.Aggregated)
 	}
 
-	return formatter.FormatData(cmd.OutOrStdout(), decrypted)
+	return formatter.FormatData(cmd.OutOrStdout(), result.Decrypted)
 }
 
 func parseDate(s string) (string, error) {
-	trimmed := strings.TrimSpace(s)
-	if trimmed == "" {
-		return "", fmt.Errorf("date is required (expected YYYY-MM-DD or RFC3339)")
-	}
-
-	if parsed, err := time.Parse(time.RFC3339, trimmed); err == nil {
-		return parsed.Format(time.RFC3339), nil
-	}
-
-	if parsed, err := time.Parse("2006-01-02", trimmed); err == nil {
-		return parsed.UTC().Format(time.RFC3339), nil
-	}
-
-	return "", fmt.Errorf("invalid date %q (expected YYYY-MM-DD or RFC3339)", s)
+	return service.ParseDate(s)
 }
 
 func resolveTypes(client *api.Client, inputs []string, aggregate *aggregator.Period) ([]int, map[int]string, error) {
-	ids, allNumeric, err := parseTypeInputs(inputs)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	if allNumeric {
-		if aggregate == nil {
-			return ids, nil, nil
-		}
-
-		resp, err := client.FetchHealthTypes()
-		if err != nil {
-			return nil, nil, err
-		}
-
-		resolver := typemap.NewTypeResolver(resp)
-		names, err := validateResolvedIDs(resolver, ids, aggregate)
-		if err != nil {
-			return nil, nil, err
-		}
-
-		return ids, names, nil
-	}
-
-	resp, err := client.FetchHealthTypes()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	resolver := typemap.NewTypeResolver(resp)
-	resolvedIDs := make([]int, 0, len(inputs))
-	typeNames := make(map[int]string)
-
-	for _, input := range inputs {
-		matches, err := resolver.ResolveType(input)
-		if err != nil {
-			return nil, nil, err
-		}
-
-		if aggregate != nil {
-			matches = filterAggregatableMatches(matches, resolver)
-			if len(matches) == 0 {
-				return nil, nil, fmt.Errorf("%w: %s", aggregator.ErrNotAggregatable, strings.TrimSpace(input))
-			}
-		}
-
-		for _, match := range matches {
-			if aggregate != nil && !resolver.IsAggregatable(match.ID) {
-				return nil, nil, fmt.Errorf("%w: %s (%d)", aggregator.ErrNotAggregatable, match.Name, match.ID)
-			}
-
-			if _, ok := typeNames[match.ID]; !ok {
-				resolvedIDs = append(resolvedIDs, match.ID)
-			}
-			typeNames[match.ID] = match.Name
-		}
-	}
-
-	return resolvedIDs, typeNames, nil
-}
-
-func parseTypeInputs(inputs []string) ([]int, bool, error) {
-	ids := make([]int, 0, len(inputs))
-	seen := make(map[int]struct{})
-	allNumeric := true
-
-	for _, input := range inputs {
-		trimmed := strings.TrimSpace(input)
-		typeID, err := strconv.Atoi(trimmed)
-		if err != nil {
-			allNumeric = false
-			continue
-		}
-
-		if _, ok := seen[typeID]; ok {
-			continue
-		}
-
-		seen[typeID] = struct{}{}
-		ids = append(ids, typeID)
-	}
-
-	if allNumeric {
-		return ids, true, nil
-	}
-
-	return nil, false, nil
-}
-
-func validateResolvedIDs(resolver *typemap.TypeResolver, ids []int, aggregate *aggregator.Period) (map[int]string, error) {
-	typeNames := make(map[int]string, len(ids))
-
-	for _, typeID := range ids {
-		matches, err := resolver.ResolveType(strconv.Itoa(typeID))
-		if err != nil {
-			return nil, err
-		}
-
-		match := matches[0]
-		typeNames[typeID] = match.Name
-
-		if aggregate != nil && !resolver.IsAggregatable(typeID) {
-			return nil, fmt.Errorf("%w: %s (%d)", aggregator.ErrNotAggregatable, match.Name, typeID)
-		}
-	}
-
-	return typeNames, nil
-}
-
-func filterAggregatableMatches(matches []api.HealthType, resolver *typemap.TypeResolver) []api.HealthType {
-	filtered := make([]api.HealthType, 0, len(matches))
-	for _, match := range matches {
-		if resolver.IsAggregatable(match.ID) {
-			filtered = append(filtered, match)
-		}
-	}
-
-	return filtered
-}
-
-func aggregatePackages(packages []api.DecryptedPackage, period aggregator.Period) ([]api.AggregatedPackage, error) {
-	aggregated := make([]api.AggregatedPackage, 0, len(packages))
-
-	for _, pkg := range packages {
-		outPkg := api.AggregatedPackage{
-			Type:     pkg.Type,
-			TypeName: pkg.TypeName,
-			Data:     make([]api.AggregatedUnitGroup, 0, len(pkg.Data)),
-		}
-
-		for _, group := range pkg.Data {
-			records, _, err := aggregator.Aggregate(group.Records, period)
-			if err != nil {
-				return nil, err
-			}
-
-			outPkg.Data = append(outPkg.Data, api.AggregatedUnitGroup{
-				Units:   group.Units,
-				Records: records,
-			})
-		}
-
-		aggregated = append(aggregated, outPkg)
-	}
-
-	return aggregated, nil
-}
-
-func resolveAPIURL() string {
-	if trimmed := strings.TrimSpace(apiURL); trimmed != "" {
-		return trimmed
-	}
-
-	cfg, err := config.Load()
-	if err == nil && strings.TrimSpace(cfg.APIURL) != "" {
-		return strings.TrimSpace(cfg.APIURL)
-	}
-
-	return config.DefaultAPIURL
+	return service.ResolveTypes(client, inputs, aggregate)
 }
 
 func resolveOutputFormat(flagValue string) string {
-	if trimmed := strings.TrimSpace(flagValue); trimmed != "" {
-		return trimmed
-	}
-
-	cfg, err := config.Load()
-	if err == nil && strings.TrimSpace(cfg.Format) != "" {
-		return strings.TrimSpace(cfg.Format)
-	}
-
-	return config.DefaultFormat
-}
-
-func fetchTypeNamesBestEffort(client *api.Client, typeIDs []int) map[int]string {
-	resp, err := client.FetchHealthTypes()
-	if err != nil {
-		return map[int]string{}
-	}
-
-	resolver := typemap.NewTypeResolver(resp)
-	names := make(map[int]string, len(typeIDs))
-	for _, typeID := range typeIDs {
-		matches, err := resolver.ResolveType(strconv.Itoa(typeID))
-		if err != nil || len(matches) == 0 {
-			continue
-		}
-
-		names[typeID] = matches[0].Name
-	}
-
-	return names
-}
-
-func enrichEncryptedTypeNames(packages []api.EncryptedPackage, typeNames map[int]string) {
-	for i := range packages {
-		packages[i].TypeName = typeNames[packages[i].Type]
-	}
-}
-
-func enrichDecryptedTypeNames(packages []api.DecryptedPackage, typeNames map[int]string) {
-	for i := range packages {
-		packages[i].TypeName = typeNames[packages[i].Type]
-	}
-}
-
-func enrichAggregatedTypeNames(packages []api.AggregatedPackage, typeNames map[int]string) {
-	for i := range packages {
-		packages[i].TypeName = typeNames[packages[i].Type]
-	}
+	return service.Options{APIURL: apiURL}.ResolvedOutputFormat(flagValue)
 }

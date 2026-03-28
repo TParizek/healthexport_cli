@@ -18,52 +18,66 @@ terminal. HealthExport CLI fetches encrypted health records from the
 HealthExport DataStore API and decrypts them locally. Your account key never
 leaves your machine.
 
-## Installation
+## Download
 
-### Homebrew (macOS / Linux)
+Start at [GitHub Releases](https://github.com/TParizek/healthexport_cli/releases).
+
+Most people should download from the latest release page:
+- `he_<version>_darwin_arm64.tar.gz` for Apple Silicon Macs
+- `he_<version>_darwin_amd64.tar.gz` for Intel Macs
+- `he_<version>_linux_arm64.tar.gz` or `he_<version>_linux_amd64.tar.gz` for Linux
+
+If you want to use Claude Desktop or Claude Cowork on macOS, also download:
+- `health-export_<version>_darwin_arm64.mcpb` for Apple Silicon Macs
+- `health-export_<version>_darwin_amd64.mcpb` for Intel Macs
+
+Homebrew is also available for the CLI:
 
 ```bash
 brew tap TParizek/healthexport_tap https://github.com/TParizek/healthexport_tap
 brew install TParizek/healthexport_tap/he
 ```
 
-### Download Binary
-
-Download the latest release for your platform from
-[GitHub Releases](https://github.com/TParizek/healthexport_cli/releases).
-
-### From Source
-
-```bash
-go install github.com/TParizek/healthexport_cli@latest
-```
-
-For a local checkout during development:
-
-```bash
-go build -o he
-```
-
 ## Quick Start
 
+### CLI setup
+
+1. Download the right `he` file from [GitHub Releases](https://github.com/TParizek/healthexport_cli/releases).
+2. Extract it and place `he` somewhere on your `PATH`.
+3. Open Terminal.
+4. Run `he auth login`.
+5. Paste your account key from https://remote.healthexport.app/settings/sharing
+6. Test it with `he types`.
+
+### Claude Desktop setup on macOS
+
+1. Install `he` first and run `he auth login`.
+2. Download the matching `health-export_<version>_darwin_<arch>.mcpb` file from [GitHub Releases](https://github.com/TParizek/healthexport_cli/releases).
+3. Open Claude Desktop.
+4. Go to `Settings > Extensions`.
+5. Choose `Advanced settings > Install Extension...`.
+6. Select the `.mcpb` file.
+7. Ask Claude to run `health_export_status`.
+
+Full Claude setup and troubleshooting instructions are in [docs/mcp.md](docs/mcp.md).
+
+## Common Commands
+
 ```bash
-# Save your account key (https://remote.healthexport.app/settings/sharing)
+# Save your account key
 he auth login
 
 # List available data types
 he types
 
-# Fetch step count for the last week
+# Fetch step count for a time range
 he data --type step_count --from 2024-01-01 --to 2024-01-07
 
-# JSON output
-he data --type step_count --from 2024-01-01 --to 2024-01-07 --format json
-
-# Aggregate by day
-he data --type step_count --from 2024-01-01 --to 2024-01-31 --aggregate day
+# Check Claude Desktop extension readiness
+he mcp status --format json
 ```
 
-Run `he --help` or `he <command> --help` for full command details.
+Run `he --help` or `he <command> --help` for more details.
 
 ## Commands
 
@@ -104,6 +118,12 @@ Inspect and update local CLI configuration:
 - `he config list`
 
 Supported keys: `format`, `api_url`, `account_key`
+
+### `he mcp`
+
+Inspect local MCP integration status for the Claude Desktop extension:
+- `he mcp status`: human-readable host readiness summary
+- `he mcp status --format json`: stable machine-readable diagnostics
 
 ### Other Commands
 
@@ -157,6 +177,18 @@ This CLI is designed to work well with coding agents and other automation:
 - Shell completions via `he completion ...`
 - One-off auth via `HEALTHEXPORT_ACCOUNT_KEY=xxx he data ...`
 
+## Claude Desktop / Cowork
+
+HealthExport includes a local macOS extension for Claude Desktop and Claude
+Cowork. Download the `.mcpb` file from [GitHub Releases](https://github.com/TParizek/healthexport_cli/releases), install `he`, run `he auth login`, then install the extension in Claude Desktop.
+
+The extension exposes three read-only tools:
+- `health_export_status`
+- `list_health_types`
+- `fetch_health_data`
+
+Full setup and troubleshooting instructions are in [docs/mcp.md](docs/mcp.md).
+
 ## Security
 
 - Your account key never leaves your machine
@@ -173,6 +205,7 @@ Minimum local verification:
 
 ```bash
 go build -o he
+go build -o he-mcp ./cmd/he-mcp
 ./he --help
 ./he --version
 go test ./...

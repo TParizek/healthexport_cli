@@ -1,14 +1,11 @@
 package cmd
 
 import (
-	"cmp"
-	"fmt"
-	"slices"
+	"errors"
 	"strings"
 
-	"github.com/TParizek/healthexport_cli/internal/api"
 	"github.com/TParizek/healthexport_cli/internal/output"
-	"github.com/TParizek/healthexport_cli/internal/typemap"
+	"github.com/TParizek/healthexport_cli/internal/service"
 	"github.com/spf13/cobra"
 )
 
@@ -16,8 +13,6 @@ var (
 	typesFormat   string
 	typesCategory string
 )
-
-var validTypeCategories = []string{"aggregated", "record", "workout"}
 
 var typesCmd = &cobra.Command{
 	Use:   "types",
@@ -52,26 +47,14 @@ func init() {
 }
 
 func runTypes(cmd *cobra.Command, args []string) error {
-	category, err := validateTypeCategory(typesCategory)
+	healthTypes, err := service.ListHealthTypes(service.Options{APIURL: apiURL}, typesCategory)
 	if err != nil {
-		return exitError(err, 4)
-	}
+		if errors.Is(err, service.ErrInvalidInput) {
+			return exitError(err, 4)
+		}
 
-	client := api.NewClient(resolveAPIURL())
-	resp, err := client.FetchHealthTypes()
-	if err != nil {
 		return err
 	}
-
-	resolver := typemap.NewTypeResolver(resp)
-	healthTypes := resolver.AllTypes()
-	if category != "" {
-		healthTypes = resolver.FilterByCategory(category)
-	}
-
-	slices.SortFunc(healthTypes, func(a, b api.HealthType) int {
-		return cmp.Compare(a.ID, b.ID)
-	})
 
 	formatter, err := output.NewFormatter(resolveOutputFormat(typesFormat))
 	if err != nil {
@@ -79,19 +62,4 @@ func runTypes(cmd *cobra.Command, args []string) error {
 	}
 
 	return formatter.FormatTypes(cmd.OutOrStdout(), healthTypes)
-}
-
-func validateTypeCategory(category string) (string, error) {
-	normalized := strings.ToLower(strings.TrimSpace(category))
-	if normalized == "" {
-		return "", nil
-	}
-
-	for _, validCategory := range validTypeCategories {
-		if normalized == validCategory {
-			return normalized, nil
-		}
-	}
-
-	return "", fmt.Errorf("invalid category %q (valid categories: %s)", category, strings.Join(validTypeCategories, ", "))
 }

@@ -7,8 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 
-	"go.yaml.in/yaml/v3"
+	yaml "go.yaml.in/yaml/v3"
 )
 
 const (
@@ -31,7 +32,13 @@ func ConfigPath() string {
 }
 
 func Load() (*Config, error) {
-	data, err := os.ReadFile(ConfigPath())
+	return LoadFromPath(ConfigPath())
+}
+
+func LoadFromPath(path string) (*Config, error) {
+	resolvedPath := ResolvePath(path)
+
+	data, err := os.ReadFile(resolvedPath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return &Config{}, nil
@@ -49,15 +56,22 @@ func Load() (*Config, error) {
 }
 
 func (c *Config) Save() error {
+	return c.SaveToPath(ConfigPath())
+}
+
+func (c *Config) SaveToPath(path string) error {
 	if c == nil {
 		return errors.New("config is nil")
 	}
 
-	if err := os.MkdirAll(ConfigDir(), 0o700); err != nil {
+	resolvedPath := ResolvePath(path)
+	configDir := filepath.Dir(resolvedPath)
+
+	if err := os.MkdirAll(configDir, 0o700); err != nil {
 		return fmt.Errorf("create config dir: %w", err)
 	}
 
-	if err := os.Chmod(ConfigDir(), 0o700); err != nil {
+	if err := os.Chmod(configDir, 0o700); err != nil {
 		return fmt.Errorf("chmod config dir: %w", err)
 	}
 
@@ -66,15 +80,46 @@ func (c *Config) Save() error {
 		return fmt.Errorf("marshal config: %w", err)
 	}
 
-	if err := os.WriteFile(ConfigPath(), data, 0o600); err != nil {
+	if err := os.WriteFile(resolvedPath, data, 0o600); err != nil {
 		return fmt.Errorf("write config: %w", err)
 	}
 
-	if err := os.Chmod(ConfigPath(), 0o600); err != nil {
+	if err := os.Chmod(resolvedPath, 0o600); err != nil {
 		return fmt.Errorf("chmod config file: %w", err)
 	}
 
 	return nil
+}
+
+func ResolvePath(override string) string {
+	if trimmed := strings.TrimSpace(override); trimmed != "" {
+		return trimmed
+	}
+
+	return ConfigPath()
+}
+
+func DisplayPath(path string) string {
+	resolvedPath := ResolvePath(path)
+	if resolvedPath == ConfigPath() {
+		return "~/.config/healthexport/config.yaml"
+	}
+
+	home, err := os.UserHomeDir()
+	if err != nil || home == "" {
+		return resolvedPath
+	}
+
+	if resolvedPath == home {
+		return "~"
+	}
+
+	prefix := home + string(os.PathSeparator)
+	if strings.HasPrefix(resolvedPath, prefix) {
+		return "~" + string(os.PathSeparator) + strings.TrimPrefix(resolvedPath, prefix)
+	}
+
+	return resolvedPath
 }
 
 func (c *Config) SetField(key, value string) error {
