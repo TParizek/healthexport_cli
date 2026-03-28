@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"strings"
 
-	"go.yaml.in/yaml/v3"
+	yaml "go.yaml.in/yaml/v3"
 )
 
 const (

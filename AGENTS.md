@@ -6,12 +6,14 @@ device.
 
 ## Agent Workflow
 
-After finishing any task, always run the CLI and the unit tests before
-considering the work done.
+After finishing any task, always run the CLI, vet, lint, and the unit tests
+before considering the work done.
 
 Minimum verification:
 
 ```bash
+go vet ./...
+./.bin/golangci-lint run
 go build -o he
 ./he --help
 ./he --version
@@ -36,9 +38,24 @@ Run tests:
 go test ./...
 ```
 
+Install the CI-matching linter locally:
+
+```bash
+mkdir -p .bin .cache/go-build .cache/gomod
+GOBIN="$PWD/.bin" GOCACHE="$PWD/.cache/go-build" GOMODCACHE="$PWD/.cache/gomod" go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+```
+
+Run lint:
+
+```bash
+./.bin/golangci-lint run
+```
+
 Run the full minimum verification suite:
 
 ```bash
+go vet ./...
+./.bin/golangci-lint run
 go build -o he
 ./he --help
 ./he --version
@@ -89,5 +106,7 @@ go test ./...
 
 - Preserve the CLI contract exposed by `--help`, exit codes, and stdout/stderr
   separation
+- Match the local lint toolchain to CI when investigating CI failures; today CI
+  resolved `golangci-lint` to `v1.64.8`
 - Add or update focused tests when behavior changes
 - Keep docs aligned with the actual command surface in `cmd/`

@@ -93,7 +93,6 @@ func FetchHealthData(opts Options, req FetchRequest) (*FetchResult, error) {
 	}
 
 	if fromTime.After(toTime) {
-		fromTime, toTime = toTime, fromTime
 		dateFrom, dateTo = dateTo, dateFrom
 	}
 

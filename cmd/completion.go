@@ -43,7 +43,7 @@ PowerShell:
   # Write Zsh completions to the first directory in fpath
   he completion zsh > "${fpath[1]}/_he"
 `),
-	Args:      cobra.ExactValidArgs(1),
+	Args:      cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 	ValidArgs: []cobra.Completion{"bash", "zsh", "fish", "powershell"},
 	RunE:      runCompletion,
 }
