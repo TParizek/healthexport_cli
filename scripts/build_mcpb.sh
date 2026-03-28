@@ -10,6 +10,9 @@ MANIFEST_VERSION="${VERSION#v}"
 GOOS="${GOOS:-darwin}"
 GOARCH="${GOARCH:-$(go env GOARCH)}"
 OUT_FILE="${1:-$ROOT_DIR/dist/health-export_${MANIFEST_VERSION}_${GOOS}_${GOARCH}.mcpb}"
+if [[ "$OUT_FILE" != /* ]]; then
+  OUT_FILE="$ROOT_DIR/$OUT_FILE"
+fi
 
 cleanup() {
   rm -rf "$TMP_DIR"

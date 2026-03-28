@@ -24,6 +24,16 @@ If you add or change behavior, add or update unit tests in the same task when
 reasonable. Do not leave the codebase without automated coverage for the change
 if a focused test can be written.
 
+If you change `.github/workflows/release.yml`, `.goreleaser.yaml`, or
+`scripts/build_mcpb.sh`, also test the release pipeline locally before
+considering the work done. At minimum:
+
+```bash
+./.bin/goreleaser release --snapshot --clean --verbose
+GOCACHE="$PWD/.cache/go-build" GOMODCACHE="$PWD/.cache/gomod" HE_MCPB_VERSION=v1.0.0-local HE_MCPB_COMMIT=$(git rev-parse HEAD) HE_MCPB_DATE=$(git log -1 --format=%cI) GOARCH=arm64 ./scripts/build_mcpb.sh dist/health-export_1.0.0-local_darwin_arm64.mcpb
+GOCACHE="$PWD/.cache/go-build" GOMODCACHE="$PWD/.cache/gomod" HE_MCPB_VERSION=v1.0.0-local HE_MCPB_COMMIT=$(git rev-parse HEAD) HE_MCPB_DATE=$(git log -1 --format=%cI) GOARCH=amd64 ./scripts/build_mcpb.sh dist/health-export_1.0.0-local_darwin_amd64.mcpb
+```
+
 ## Common Commands
 
 Build the binary:
@@ -49,6 +59,12 @@ Run lint:
 
 ```bash
 ./.bin/golangci-lint run
+```
+
+Install GoReleaser locally:
+
+```bash
+GOBIN="$PWD/.bin" GOCACHE="$PWD/.cache/go-build-host" GOMODCACHE="$PWD/.cache/gomod-host" go install github.com/goreleaser/goreleaser/v2@latest
 ```
 
 Run the full minimum verification suite:
@@ -108,5 +124,7 @@ go test ./...
   separation
 - Match the local lint toolchain to CI when investigating CI failures; today CI
   resolved `golangci-lint` to `v1.64.8`
+- When changing the release pipeline, run a local GoReleaser snapshot plus both
+  MCPB asset build commands before declaring success
 - Add or update focused tests when behavior changes
 - Keep docs aligned with the actual command surface in `cmd/`
