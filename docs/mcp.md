@@ -1,4 +1,9 @@
-# HealthExport MCP Extension
+# HealthExport Local MCP Extension
+
+This guide covers the local macOS extension. Compare
+[hosted and local MCP](../README.md#mcp) to choose where the server runs and
+where records are decrypted. Hosted MCP uses a server URL and Apple sign-in;
+the local extension below uses CLI credentials and local decryption.
 
 HealthExport ships a local Model Context Protocol server for Claude Desktop and
 Claude Cowork as a macOS-only `.mcpb` extension.
