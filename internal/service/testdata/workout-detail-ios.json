@@ -1,0 +1,32 @@
+{
+  "manifest" : "nfJ9P56C2UIsbtYIdQQpiEG79MeW05xdqpwlcrVvfL+R63aY97lQRCSJEMSVjwOaA3RN1QcVmF98gh\/LtP\/aRuqzb8MZmCQGGsV+8dfcm8YjfjDx29MBIQN3gZ1hYBp4rWud2xaaRoBnli+bOjIW+PqlmrOI8r3Q1QL5U9f8yibtONQ7ZxvzwRpqRsoYwbqMpuvOtCsMvaz7qRMIm0qtDlkLeGDasyZySR7dR+ujE7pBZfNJlQ\/hYW7tuHIKldTxeekzV9kNl4599lmwAfU7l7OskW6hBlAknGvrCP\/OpLZgWdOPvq8o7M+7dT2Wli+f9KcdZzifLdZ7a4yFN2LZbEh92aM0oyZNd4Bw75pIqwOsZDkdUlPtcXeJlj+klUr0a\/938uzl6aotYdlHQgUkFafNjUNgjPe8vaeD9M2uKsffntIHQhW5vKshSTvYCqfrsbseRek60pylIKMlqRX9OjImUu3AgVi46zqEOdTXG95nlRdPpeYDczpw3JR2eskHgahRMnpry1pGozY+jflqLpRrFJC2tOjuQSnHPqxVE7v3dZ58eON3Ww3eDpc79PjAWyI+WRFZYMgOaXmMYi5CN0kW5UcBOR8CgL\/82kZAAqeSuHwmhF0kYH39hyI6xiewVulPMb8syoKGbS+UcuPinOks2NVqED4c5\/tC+RencIvJ2YxhLnCjSQkZdNOdpNh+M98RzWeUs88r9rvqquxg2YZhh8UntTpXfo9JR\/IZeG2sfEU\/teFIcLO1VQBNSbd54plGH0SlwxFDgbs6xbkVBqeHk9NhRGccaM2pyFG2Xo0brGCKQtharubVc4GKhFvaDdcUuKo0YwS5jvvj7NDhWB4YjUZTJ28sYB3Frip4fD7ZtOoeHBbRIGznB2h\/shIjfdqs4XJIq4OD5EhPcx4EsVLV723l1AMavYrK78zNQaIZbXcMGysplHjnZ95+gccw0mm6m8ytlbse2GOgn2eAEEo+F2VLguY+4F+lK5cq3xOgxuEq4Ec6oK+2RDr9SL+QkcL3o1EydrHrBbrvobW9K99BXL\/m7IymMUzfaHJQMCj74BzfBO2gggSkYS4o7ebHceqzDB047Cx5KuXAu6d6SqeC\/LNqOfZfpD5IjyPu\/nvoSvsiwesX9Tushp2KRkPuS3eXQl1WgmNfQFaLJYrNb6uCp\/VILKW+yE0Z+xZQPi6TXDVK0ymAIFKdcsLfCEvYVWOm10AnADrU\/Fd9ODG+TESmAUvkwWFit0+t",
+  "pages" : [
+    {
+      "sealed" : "K5W23kvz4hTZQNX4fjgEQm9bDlnKNRYliOEZnKtCEe7gvgq4M1deaVOUiGKWvBksOcNiorsSDejK7+LFrGtP68z1voTXEaCaEZno5tsiWZElWFMOO\/LmuFctaFUVSPAK+TuQJVCbYwkWeFILl+1Z+1H+Sjh\/FzLj4XIuCRHmZj7JN2gdpuKfRp6QyeoF4KAiNoPOW3qHK8g=",
+      "section" : "heartRate"
+    },
+    {
+      "sealed" : "RLcjXaxra+XKIiSHzZ4MNyDkBychcXFS7lLnGTUkY\/vA7mhhXpuPnd9v7jiuEAzlZJaheFsar2iI8rh9FtSUBzhkTFrH\/rwrm\/VMxzJgyt20nsZIsYG7DfYdvoGC1mSr6XThJJJmCxdaRlQHw81zuHwOlESbLabxj1rN2BUMs2gSCQQFwBA0F+ppeXSucF8wtGZV08wAeQEDt9vvk1wG7eLUX4Zt54SFJ+97oIdH",
+      "section" : "distance"
+    },
+    {
+      "sealed" : "2UIGnP+xkZy1XkwmHad33NLqG5TG46EJ5\/lW\/N5G\/52OGwT3\/RGiwt+uHXk24h9gtHWw6sHFVHUnlFozzqOScUPhaK7y5BiMqE6saFGeYB0fRHFmQ7axyjtoqsnc6t49DJVWYTgP9GjnKsYLGvX6qSfFogg09QZ2Z9hqGLhnwjU95dHyRtAHcOuXw2Gprk1OpnCHr2SomuiOQ4S2I6Y64cllUq9NaVjS7gI6gLMFj2Xh9PngNEk\/fGqDkQ==",
+      "section" : "speed"
+    },
+    {
+      "sealed" : "y83n7Nv9Tgq4XOy3WffxwM90Pdkdx2iGOo+Y8wV3eZyVBsILgGEdOPKUqeNzp0kfnER7DF4YKYQJyUUrOk0m7WwY\/\/moyFj4DFQVdatZ\/cg5XFyPWrLECBm8BFyEt3eneOIN3HniDLiQbC3UtQFCA6C45K5Dv2XjJ+dJZud7dKqXKDC\/VL63w1mtsz00tTrb3arrT+zr3D8Id+vH6P7dU8\/zpsUrIg0z4vEvkyUU9YeMuCle04RfWt88x0kI2xKcBA5JrknllsTd5mEK+poy7kY=",
+      "section" : "elevation"
+    },
+    {
+      "sealed" : "BPD1cLjcM416tjAAc\/VZ6vd8e47GIpBPmG30DMA+mSV8NCDCPpND9akYzj8XV9Y\/r5tRlrIPbbU1S9CDpXh8W8OmK4mOxvCgGBOPkd1kL7RSYUho84wwxHIYjqbLWtkkv48a4Jfp\/XOQ82oM9LnC11fZMHxSD8b1Aj6vcf8hi4ElGQSMHmgchYGqGEjIb9hxfVGysFsBTFhpnvMn7zeclbx0L7uCZrjIRzI10cPxW51Nu\/HxEBiUFHMXjnrKWNCmevS5doez32A=",
+      "section" : "power"
+    },
+    {
+      "sealed" : "Ha7cdvO2WXeqZ+UasH4QdPsh0sLybKjC5YGVKZpNtL+AjnwDnfjKDuqCVzt4LEsBXf5EP2WSiGPQciP80Ph09HaqPPQGpF2b+YkRZLWt3HLmhF6Qc3OmQV3QTyC\/gyx7XAOuDXcVqMLBynXKH\/c1tXAr6\/auEFzaZfXoV89aeg==",
+      "section" : "cadence"
+    }
+  ],
+  "revision" : "87654321-4321-4321-4321-cba987654321",
+  "start" : "2026-10-06T10:00:00Z",
+  "workoutId" : "12345678-1234-1234-1234-123456789abc"
+}

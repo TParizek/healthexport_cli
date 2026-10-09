@@ -45,3 +45,35 @@ Suggested targets:
 - macOS amd64
 - Linux amd64
 - Windows amd64
+
+## Workout details
+
+`go test ./...` exercises a synthetic encrypted workout backend through service,
+CLI command, and local MCP protocol tests. It covers complete pagination,
+revision conflicts, authenticated envelope identity, malformed or missing pages,
+unit conversion, unavailable measurements, and output formats. Late-page failures
+must leave stdout empty.
+
+Compatibility fixtures under `internal/service/testdata/`:
+
+- `workout-detail-ios.json`: synthetic AES-GCM envelopes emitted by the iOS
+  Swift CryptoKit exporter, copied from HE-MCP's interoperability fixture.
+- `workout-web-export.json`: generated using HE-FE-Remote's
+  `src/models/WorkoutDetailExport.ts` `createWorkoutDetailJsonExport` function
+  with the synthetic data in `internal/workouttest/fixture.go`. Regenerate with
+  that website helper if the export contract changes, then run
+  `TestWorkoutExportMatchesWebsiteGolden`. Do not derive the expected fixture
+  from the CLI exporter itself.
+
+For a read-only live check, use an existing CLI login:
+
+```bash
+./he workouts list --from 2026-10-01 --to 2026-10-10 --format json
+# Replace the placeholders with an ID and revision from the listing.
+./he workouts export <workout-id> --revision <revision> > workout.json
+./he workouts series <workout-id> --revision <revision> --section heartRate --format csv > heart-rate.csv
+```
+
+Choose a range containing your uploaded workouts. Compare measurement counts,
+splits, and values with the website export. Keep account keys and real health
+records out of committed fixtures. The automated suite uses only synthetic data.

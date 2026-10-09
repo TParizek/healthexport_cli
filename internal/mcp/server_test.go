@@ -425,8 +425,8 @@ func TestServeInitializeAndListTools(t *testing.T) {
 	}
 
 	tools := listResp["result"].(map[string]any)["tools"].([]any)
-	if len(tools) != 3 {
-		t.Fatalf("len(tools) = %d, want 3", len(tools))
+	if len(tools) != 6 {
+		t.Fatalf("len(tools) = %d, want 6", len(tools))
 	}
 
 	toolDescriptions := make(map[string]string, len(tools))

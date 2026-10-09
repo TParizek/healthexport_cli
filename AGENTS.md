@@ -94,7 +94,7 @@ go test ./...
 - `internal/api/`: HTTP client and API response types
 - `internal/auth/`: account key parsing, UID derivation, key resolution
 - `internal/config/`: config file read/write and defaults
-- `internal/crypto/`: ChaCha20 decryption
+- `internal/crypto/`: ChaCha20 record decryption and authenticated AES-GCM workout decryption
 - `internal/aggregator/`: client-side time-bucket aggregation
 - `internal/typemap/`: type name to ID resolution and category filtering
 - `internal/output/`: CSV and JSON formatters
@@ -109,7 +109,7 @@ go test ./...
 - Never transmit the raw account key over the network
 - Only the derived UID hash is sent to the API
 - Account key resolution priority is flag > env > config
-- Decryption uses ChaCha20, matching the backend implementation
+- Legacy record decryption uses ChaCha20; workout details use AES-GCM bound to UID, workout ID, revision, and manifest/page identity
 - The decryption key bytes are the UTF-8 bytes of the 32-character hex string,
   not hex-decoded bytes
 - Default output format is CSV; JSON is available with `--format json`
