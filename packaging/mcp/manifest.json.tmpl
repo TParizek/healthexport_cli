@@ -29,15 +29,27 @@
   "tools": [
     {
       "name": "list_health_types",
-      "description": "HealthExport healthexport he — List all available health and fitness metric types from Apple Health. Returns categories of queryable metrics including: steps, step count, walking, running distance, cycling distance, flights climbed, active calories, resting calories, exercise minutes, heart rate, resting heart rate, HRV, blood pressure, blood oxygen, respiratory rate, body temperature, weight, BMI, body fat, sleep, sleep analysis, nutrition, water intake, caffeine, workouts, and more. Call this tool first before fetching any health data to discover which metrics are available. Supports filtering by category: 'aggregated' (totals like steps and calories), 'record' (readings like heart rate and weight), or 'workout' (exercise sessions)."
+      "description": "HealthExport healthexport he \u2014 List all available health and fitness metric types from Apple Health. Returns categories of queryable metrics including: steps, step count, walking, running distance, cycling distance, flights climbed, active calories, resting calories, exercise minutes, heart rate, resting heart rate, HRV, blood pressure, blood oxygen, respiratory rate, body temperature, weight, BMI, body fat, sleep, sleep analysis, nutrition, water intake, caffeine, workouts, and more. Call this tool first before fetching any health data to discover which metrics are available. Supports filtering by category: 'aggregated' (totals like steps and calories), 'record' (readings like heart rate and weight), or 'workout' (exercise sessions)."
     },
     {
       "name": "fetch_health_data",
-      "description": "HealthExport healthexport he — Fetch health and fitness data from Apple Health for a specific date range. Query any metric including steps, step count, walking distance, running distance, cycling distance, flights climbed, active energy, resting energy, exercise time, heart rate, resting heart rate, HRV, blood pressure, blood oxygen, weight, BMI, body fat, sleep analysis, water intake, nutrition, caffeine, workouts, and more. Results can be aggregated by day, week, month, or year for trends and summaries. Use list_health_types first to discover all available metric names."
+      "description": "HealthExport healthexport he \u2014 Fetch health and fitness data from Apple Health for a specific date range. Query any metric including steps, step count, walking distance, running distance, cycling distance, flights climbed, active energy, resting energy, exercise time, heart rate, resting heart rate, HRV, blood pressure, blood oxygen, weight, BMI, body fat, sleep analysis, water intake, nutrition, caffeine, workouts, and more. Results can be aggregated by day, week, month, or year for trends and summaries. Use list_health_types first to discover all available metric names."
     },
     {
       "name": "health_export_status",
-      "description": "HealthExport healthexport he — Check whether the HealthExport MCP server is connected and ready to query Apple Health data. Call this to verify connectivity before fetching steps, heart rate, sleep, weight, workouts, calories, or any other health and fitness metrics."
+      "description": "HealthExport healthexport he \u2014 Check whether the HealthExport MCP server is connected and ready to query Apple Health data. Call this to verify connectivity before fetching steps, heart rate, sleep, weight, workouts, calories, or any other health and fitness metrics."
+    },
+    {
+      "name": "list_workouts",
+      "description": "List uploaded enriched workout manifests without streams; follow nextOffset."
+    },
+    {
+      "name": "fetch_workout_detail",
+      "description": "Read a workout manifest and bounded events and splits using its ID and revision."
+    },
+    {
+      "name": "fetch_workout_series",
+      "description": "Read a selected workout measurement stream with aggregation metadata, units, gaps and bounded pagination."
     }
   ],
   "tools_generated": true,

@@ -47,6 +47,9 @@ extra setup.
 - `health_export_status`
 - `list_health_types`
 - `fetch_health_data`
+- `list_workouts`
+- `fetch_workout_detail`
+- `fetch_workout_series`
 
 All tools are read-only. The server never returns the raw account key.
 
@@ -99,3 +102,15 @@ If you are working from source, you can still build the extension locally:
 ```bash
 ./scripts/build_mcpb.sh
 ```
+
+## Workout tools
+
+These tools read only previously uploaded workout details. They do not trigger sync or include summary-only workouts. Distinct workout IDs remain distinct.
+
+1. `list_workouts`: `start` and `end` are inclusive RFC3339 timestamps, at most millisecond precision and 366 days apart. Returns manifests only; `limit` is 1–10 (default 10), `offset` defaults to 0. Follow `nextOffset` until null.
+2. `fetch_workout_detail`: pass `workoutId` and `revision` from the listing. Returns the manifest plus events and recorded `splitUnit` (`km` default, or `mi`). `limit` is 1–4 source pages per section (default 1). Each section has its own `nextOffset`; repeat using each unfinished section's offset. No numeric streams are loaded. Split distances remain meters for both split sets.
+3. `fetch_workout_series`: pass `workoutId`, `revision`, and one `section`: `heartRate`, `distance`, `speed`, `elevation`, `power`, or `cadence`. `limit` is 1–8 source pages (default 1), each with at most 256 stored points. Follow `nextOffset`. Optional `unit` converts values and extrema to a compatible unit (`km`, `mi`, `ft`, `km/h`, `mph`) or uses the canonical unit.
+
+For example, list a week's workouts, select the relevant ID/revision/source, then fetch only its heart-rate stream. Use the manifest's availability to distinguish missing data from zero values. Offsets, durations and coverage are seconds; `breakBefore` marks gaps. Preserve aggregation interval/method/source and point `kind`, `min`, `max`, and `count` when interpreting the data. Stored means do not reconstruct original HealthKit samples or raw peaks.
+
+Revision conflicts return an API error: list again and restart the read, without mixing uploads. MCP results remain bounded; the CLI's `he workouts export` intentionally follows all pages to produce the complete website-compatible JSON document. FIT/TCX/GPX export is not supported.

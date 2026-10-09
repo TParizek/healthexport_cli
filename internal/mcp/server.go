@@ -128,6 +128,8 @@ func (s *Server) Serve(ctx context.Context) error {
 
 func (s *Server) HandleToolCall(name string, arguments map[string]any) toolResult {
 	switch name {
+	case "list_workouts", "fetch_workout_detail", "fetch_workout_series":
+		return s.handleWorkoutTool(name, arguments)
 	case "list_health_types":
 		return s.handleListHealthTypes(arguments)
 	case "fetch_health_data":
@@ -140,6 +142,10 @@ func (s *Server) HandleToolCall(name string, arguments map[string]any) toolResul
 }
 
 func ToolDefinitions() []toolDefinition {
+	return append(legacyToolDefinitions(), workoutToolDefinitions()...)
+}
+
+func legacyToolDefinitions() []toolDefinition {
 	return []toolDefinition{
 		{
 			Name:        "list_health_types",

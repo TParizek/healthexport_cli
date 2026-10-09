@@ -55,6 +55,9 @@ he types
 
 # Fetch step count for a time range
 he data --type step_count --from 2024-01-01 --to 2024-01-07
+
+# List uploaded workouts with details
+he workouts list --from 2026-10-01 --to 2026-10-10 --format json
 ```
 
 Run `he --help` or `he <command> --help` for more details.
@@ -80,6 +83,10 @@ List available health data types, including canonical names, numeric IDs, and wh
 Key flags:
 - `--format`: `csv` or `json`
 - `--category`: `aggregated`, `record`, or `workout`
+
+### `he workouts`
+
+List uploaded workout details, export a complete JSON document, or fetch individual measurement streams, splits, and events. See [Workout details](#workout-details) for examples, units, formats, and revision handling.
 
 ### `he auth`
 
@@ -160,9 +167,37 @@ These properties describe this CLI and its local extension, not hosted MCP. When
 - Your account key never leaves your machine
 - The CLI always fetches from the encrypted API endpoint
 - Only the derived UID hash is sent to the API
-- Decryption uses ChaCha20 locally in the CLI process
+- Decryption runs locally: ChaCha20 for legacy records and authenticated AES-GCM for workout details
 - `--raw` lets you inspect the encrypted payload returned by the server
 - Config directories are written with `0700` permissions and the config file with `0600`
+
+## Workout details
+
+List uploaded enriched workouts without downloading their measurements:
+
+```bash
+he workouts list --from 2026-10-01 --to 2026-10-10 --format json
+```
+
+Use a `workoutId` and `revision` from the listing:
+
+```bash
+he workouts export <workout-id> --revision <revision> > workout.json
+he workouts series <workout-id> --revision <revision> --section heartRate --format csv > heart-rate.csv
+he workouts series <workout-id> --revision <revision> --section speed --unit km/h --format json
+he workouts splits <workout-id> --revision <revision> --split-unit mi --format csv > splits.csv
+he workouts events <workout-id> --revision <revision> --format csv > events.csv
+```
+
+- `list`, `series`, `splits`, and `events` use `--format` → configured format → CSV.
+- `export` always writes JSON, matching the website's `exportVersion: 1` document. It includes all stored measurements, both split sets, events, availability, and aggregation metadata in canonical units. There is no `--format` flag for this command.
+- Dates accept `YYYY-MM-DD` (UTC midnight) or RFC3339, with at most millisecond precision. Both endpoints are inclusive; a date-only `--to` does **not** include that entire day. Reversed dates are swapped, as with `he data`. The maximum range is 366 days.
+- CLI commands follow every page before writing data to stdout. Errors and empty-section messages go to stderr. A missing measurement is not a zero. CSV represents missing fields as empty cells; JSON omits absent optional measurements.
+- `series --section` accepts `heartRate`, `distance`, `speed`, `elevation`, `power`, or `cadence`. `--unit` converts values and min/max in CSV and JSON where compatible. Full exports always use canonical units.
+- `--split-unit km|mi` selects the recorded split set; distances in both remain **meters**. Times and offsets are seconds; timestamps are ISO 8601.
+- A revision identifies the current upload, not a historical stored version. If a new upload changes it during a read, refresh `workouts list` and retry. Listing uses offset pagination and is not a snapshot during concurrent uploads; use a quiet period for large listings.
+- Distinct recording IDs remain distinct. Details are only present for workouts uploaded with enriched data. Existing summaries remain available through `he data --type 26`.
+- These are stored, potentially aggregated measurements, not all original HealthKit samples. Means cannot reconstruct raw peaks or exact effort durations. No automatic sync/backfill, extra aggregation, or FIT/TCX/GPX export is performed.
 
 ## MCP
 
@@ -177,7 +212,7 @@ Enable Remote on your iPhone, grant Apple Health access, and finish the initial 
 | Connection | Remote MCP over Streamable HTTP | Local `he-mcp` process over standard input/output (stdio) |
 | Authentication | Sign in with Apple and approve read-only access | Account key saved locally with `he auth login` |
 | Decryption | Requested records are decrypted in hosted server memory | Records are decrypted on your computer |
-| Tools | Status, type catalog, individual records, and a separate aggregation tool | Status, type catalog, and record fetching with an optional aggregation parameter |
+| Tools | Status, type catalog, records, separate aggregation, and workout details | Status, type catalog, records with optional aggregation, and workout details |
 | Request size | Up to 7 days, 4 health types, and 2,000 input records per request | Does not use those hosted limits; large responses produce warnings |
 | Clients | Claude, the Codex app, or another compatible remote MCP client | Clients that can launch a local stdio server; a macOS `.mcpb` package is provided for Claude Desktop |
 
@@ -206,7 +241,7 @@ See the [MCP setup guide](https://healthexport.app/apple-watch-mcp.html#setup) f
 
 Hosted MCP reads **previously uploaded records**. It cannot access your watch or HealthKit directly, trigger an iPhone sync, or modify health records. Background upload timing depends on iOS. Queries support up to **7 days, 4 health types and 2,000 input records** per request; oversized requests must be narrowed. Only eligible numeric types can be summed.
 
-The hosted service exposes four read-only tools: `health_export_status`, `list_health_types`, `fetch_health_data`, and `fetch_aggregated_health_data`. Status does not verify data freshness, and the catalog does not prove that your account contains every listed type.
+The hosted service exposes seven read-only tools: `health_export_status`, `list_health_types`, `fetch_health_data`, `fetch_aggregated_health_data`, `list_workouts`, `fetch_workout_detail`, and `fetch_workout_series`. The limits above apply to health-record queries; workout tools have the separate bounds described in [the workout tool guide](docs/mcp.md#workout-tools). Status does not verify data freshness, and the catalog does not prove that your account contains every listed type.
 
 **Privacy:** hosted MCP decrypts requested records in server memory and sends results to your AI client and its provider. Customer decryption keys are not stored in the MCP database; decryption material is present in server memory during use. Review your AI provider's privacy settings before connecting.
 
@@ -232,7 +267,7 @@ go build -o bin/he-mcp ./cmd/he-mcp
 
 Use the executable's absolute path in your client's MCP configuration. It reads the same local config as `he`; set `HE_MCP_CONFIG_PATH` in the server's environment if you use a custom config path. Other client configurations have not been verified end to end with HealthExport.
 
-The local server exposes three read-only tools: `health_export_status`, `list_health_types`, and `fetch_health_data`. For eligible cumulative types, `fetch_health_data` accepts an `aggregate` parameter with `day`, `week`, `month`, or `year`. Hosted MCP's per-request limits above describe the hosted service, not this local server; keep local requests focused to avoid large responses.
+The local server exposes six read-only tools: `health_export_status`, `list_health_types`, `fetch_health_data`, `list_workouts`, `fetch_workout_detail`, and `fetch_workout_series`. Workout tools share the hosted workout contracts and pagination bounds described in [the tool guide](docs/mcp.md#workout-tools). For eligible cumulative types, `fetch_health_data` accepts an `aggregate` parameter with `day`, `week`, `month`, or `year`. Hosted MCP's per-request limits above describe the hosted service, not this local server; keep local requests focused to avoid large responses.
 
 **Privacy:** your account key stays on your computer, and decryption happens locally. Requested results still go to the connected AI client. Treat your account key like a password; unlike a hosted MCP grant, a shared account key cannot currently be revoked or rotated. Hosted Apple sign-in does not authenticate the local server.
 

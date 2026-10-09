@@ -9,7 +9,7 @@ You have access to the **HealthExport MCP server** which reads data from Apple H
 
 ## Step 1: Fetch the tools
 
-Use `ToolSearch` with query `select:mcp__HealthExport__fetch_health_data,mcp__HealthExport__list_health_types,mcp__HealthExport__health_export_status` to load the tool schemas.
+Use `ToolSearch` with query `select:mcp__HealthExport__fetch_health_data,mcp__HealthExport__list_health_types,mcp__HealthExport__health_export_status,mcp__HealthExport__list_workouts,mcp__HealthExport__fetch_workout_detail,mcp__HealthExport__fetch_workout_series` to load the tool schemas.
 
 ## Step 2: Check connectivity (optional, use if first query fails)
 
@@ -34,8 +34,9 @@ Call `mcp__HealthExport__fetch_health_data` with:
 
 - **"Steps from last year"** → `list_health_types` (category: aggregated) → find "Step count" → `fetch_health_data` with from/to spanning the year and aggregate: "month"
 - **"My sleep this week"** → `list_health_types` (category: record) → find "Sleep analysis" → `fetch_health_data` with this week's date range
-- **"Daily heart rate for March"** → `fetch_health_data` with types: ["Heart rate"], aggregate: "day"
-- **"Compare my workouts month over month"** → `list_health_types` (category: workout) → `fetch_health_data` with aggregate: "month"
+- **"Heart rate for March"** → `fetch_health_data` with types: ["Heart rate"] and focused date ranges; heart rate is not a cumulative sum.
+- **"Compare my workouts month over month"** → fetch workout summaries without aggregation, or use `list_workouts` for uploaded enriched workouts.
+- **"Heart rate and splits for my run"** → `list_workouts` → choose the recording by ID/source → `fetch_workout_detail` and `fetch_workout_series` for `heartRate`.
 
 ## Visualization
 
@@ -45,3 +46,12 @@ When the user asks for a chart, graph, or visualization, use Python (matplotlib)
 - Average line for context
 - Total annotation when it makes sense
 - Clean styling (hide top/right spines, subtle grid)
+
+## Workout details
+
+Use `list_workouts` with inclusive RFC3339 `start`/`end` (maximum 366 days, 10 workouts per page). Follow `nextOffset`. Then use its `workoutId` and `revision`:
+
+- `fetch_workout_detail`: events plus `splitUnit` km/mi; 1–4 pages per section. Follow each section's continuation independently. Split distances remain meters.
+- `fetch_workout_series`: explicitly select heartRate/distance/speed/elevation/power/cadence; 1–8 pages, 256 points each. Follow `nextOffset`; request unit conversion only when needed.
+
+Check availability; missing data is not zero. Stored aggregates cannot recover raw peaks or exact effort durations. Retain point kind, extrema, sample count, coverage and gaps. A revision conflict means list again and restart. These tools do not sync HealthKit. Full CLI JSON exports use `he workouts export`; FIT/TCX/GPX are unsupported.

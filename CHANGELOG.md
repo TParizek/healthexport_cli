@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-10-09
+
+- Adds workout listing, complete JSON exports, and CSV/JSON measurement streams, splits, and events.
+- Adds `list_workouts`, `fetch_workout_detail`, and `fetch_workout_series` to the local MCP extension.
+- Decrypts workout details locally and preserves aggregation metadata, units, gaps, and recording identities.
+
 ## [1.1.0] - 2026-03-28
 
 - Adds a local macOS MCP extension for Claude Desktop and Claude Cowork.
